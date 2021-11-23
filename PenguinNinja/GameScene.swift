@@ -127,6 +127,16 @@ class GameScene: SKScene {
         if !isSwooshSoundActive {
             playSwooshSound()
         }
+        
+        let nodesAtPoint = nodes(at: location)
+
+        for case let node as SKSpriteNode in nodesAtPoint {
+            if node.name == "enemy" {
+                // destroy penguin
+            } else if node.name == "bomb" {
+                // destroy bomb
+            }
+        }
 
     }
     
