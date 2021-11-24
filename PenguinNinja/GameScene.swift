@@ -66,7 +66,19 @@ class GameScene: SKScene {
     }
     
     func startGame() {
+        isGameEnded = false
+        chainDelay = 3.0
+        lives = 3
+        popupTime = 0.9
+        sequencePosition = 0
+        
+        for childNode in self.children {
+            if childNode.name == "sliceLife" || childNode.name == "endLabelGame" {
+                childNode.removeFromParent()
+            }
+        }
         physicsWorld.speed = 0.85
+        isUserInteractionEnabled = true
         
         createScore()
         createLives()
@@ -500,7 +512,7 @@ class GameScene: SKScene {
 
         isGameEnded = true
         physicsWorld.speed = 0
-        isUserInteractionEnabled = false
+        //isUserInteractionEnabled = false
 
         bombSoundEffect?.stop()
         bombSoundEffect = nil
