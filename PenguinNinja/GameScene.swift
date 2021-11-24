@@ -62,6 +62,10 @@ class GameScene: SKScene {
         addChild(background)
 
         physicsWorld.gravity = CGVector(dx: 0, dy: -6)
+        startGame()
+    }
+    
+    func startGame() {
         physicsWorld.speed = 0.85
         
         createScore()
@@ -221,22 +225,34 @@ class GameScene: SKScene {
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
+        
+        if isGameEnded {
+            if childNode(withName: "endGameLabel") != nil {
+                let location = touch.location(in: self)
+                let objects = nodes(at: location)
+                for obj in objects {
+                    if obj.name == "endGameLabel" {
+                        startGame()
+                    }
+                }
+            }
+        }
 
-        // 1
+        // Remove all existing points in the activeSlicePoints array, because we're starting fresh.
         activeSlicePoints.removeAll(keepingCapacity: true)
 
-        // 2
+        // Get the touch location and add it to the activeSlicePoints array.
         let location = touch.location(in: self)
         activeSlicePoints.append(location)
 
-        // 3
+        // Call the redrawActiveSlice() method to clear the slice shapes.
         redrawActiveSlice()
 
-        // 4
+        // Remove any actions that are currently attached to the slice shapes. This will be important if they are in the middle of a fadeOut(withDuration:) action.
         activeSliceBG.removeAllActions()
         activeSliceFG.removeAllActions()
 
-        // 5
+        // Set both slice shapes to have an alpha value of 1 so they are fully visible.
         activeSliceBG.alpha = 1
         activeSliceFG.alpha = 1
     }
@@ -494,5 +510,16 @@ class GameScene: SKScene {
             livesImages[1].texture = SKTexture(imageNamed: "sliceLifeGone")
             livesImages[2].texture = SKTexture(imageNamed: "sliceLifeGone")
         }
+        
+        let endGameLabel = SKLabelNode(fontNamed: "Chalkduster")
+        endGameLabel.fontSize = 48
+        endGameLabel.position.x = frame.midX
+        endGameLabel.position.y = frame.midY
+        endGameLabel.name = "endGameLabel"
+        endGameLabel.text = "Tap to play again"
+        addChild(endGameLabel)
+        
+        sequence.removeAll(keepingCapacity: true)
+        gameScore.removeFromParent()
     }
 }
