@@ -133,8 +133,65 @@ class GameScene: SKScene {
         for case let node as SKSpriteNode in nodesAtPoint {
             if node.name == "enemy" {
                 // destroy penguin
+                
+                // Create a particle effect over the penguin.
+                if let emitter = SKEmitterNode(fileNamed: "sliceHitEnemy") {
+                    emitter.position = node.position
+                    addChild(emitter)
+                }
+
+                // Clear its node name so that it can't be swiped repeatedly.
+                node.name = ""
+
+                // Disable the isDynamic of its physics body so that it doesn't carry on falling.
+                node.physicsBody?.isDynamic = false
+
+                // Make the penguin scale out and fade out at the same time.
+                let scaleOut = SKAction.scale(to: 0.001, duration:0.2)
+                let fadeOut = SKAction.fadeOut(withDuration: 0.2)
+                let group = SKAction.group([scaleOut, fadeOut])
+
+                // After making the penguin scale out and fade out, we should remove it from the scene.
+                let seq = SKAction.sequence([group, .removeFromParent()])
+                node.run(seq)
+
+                // Add one to the player's score.
+                score += 1
+
+                // Remove the enemy from our activeEnemies array.
+                if let index = activeEnemies.firstIndex(of: node) {
+                    activeEnemies.remove(at: index)
+                }
+
+                // Play a sound so the player knows they hit the penguin.
+                run(SKAction.playSoundFileNamed("whack.caf", waitForCompletion: false))
             } else if node.name == "bomb" {
                 // destroy bomb
+                guard let bombContainer = node.parent as? SKSpriteNode else { continue }
+
+                if let emitter = SKEmitterNode(fileNamed: "sliceHitBomb") {
+                    emitter.position = bombContainer.position
+                    addChild(emitter)
+                }
+
+                node.name = ""
+                bombContainer.physicsBody?.isDynamic = false
+
+                let scaleOut = SKAction.scale(to: 0.001, duration:0.2)
+                let fadeOut = SKAction.fadeOut(withDuration: 0.2)
+                let group = SKAction.group([scaleOut, fadeOut])
+
+                let seq = SKAction.sequence([group, .removeFromParent()])
+                bombContainer.run(seq)
+
+                if let index = activeEnemies.firstIndex(of: bombContainer) {
+                    activeEnemies.remove(at: index)
+                }
+
+                run(SKAction.playSoundFileNamed("explosion.caf", waitForCompletion: false))
+                
+                // Player lose game
+                endGame(triggeredByBomb: true)
             }
         }
 
