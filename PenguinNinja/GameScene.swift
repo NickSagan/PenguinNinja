@@ -73,12 +73,11 @@ class GameScene: SKScene {
         sequencePosition = 0
         
         for childNode in self.children {
-            if childNode.name == "sliceLife" || childNode.name == "endLabelGame" {
+            if childNode.name == "sliceLife" || childNode.name == "endGameLabel" || childNode.name == "gameScore" {
                 childNode.removeFromParent()
             }
         }
         physicsWorld.speed = 0.85
-        isUserInteractionEnabled = true
         
         createScore()
         createLives()
@@ -102,6 +101,7 @@ class GameScene: SKScene {
         gameScore = SKLabelNode(fontNamed: "Chalkduster")
         gameScore.horizontalAlignmentMode = .left
         gameScore.fontSize = 48
+        gameScore.name = "gameScore"
         addChild(gameScore)
 
         gameScore.position = CGPoint(x: 8, y: 8)
@@ -302,9 +302,9 @@ class GameScene: SKScene {
         }
         
         // we're always going to increase the speed of our physics world, so that objects move rise and fall faster too.
-        popupTime *= 0.991
-        chainDelay *= 0.99
-        physicsWorld.speed *= 1.02
+        popupTime *= K.popupTimeMultiplier
+        chainDelay *= K.chainDelayMultiplier
+        physicsWorld.speed *= K.physicsWorldSpeedMultiplier
 
         let sequenceType = sequence[sequencePosition]
 
@@ -405,26 +405,26 @@ class GameScene: SKScene {
 
         // position code goes here
         // Give the enemy a random position off the bottom edge of the screen.
-        let randomPosition = CGPoint(x: Int.random(in: 64...960), y: -128)
+        let randomPosition = CGPoint(x: Int.random(in: K.launchRangeX), y: K.launchPositionY)
         enemy.position = randomPosition
 
         // Create a random angular velocity, which is how fast something should spin.
-        let randomAngularVelocity = CGFloat.random(in: -3...3 )
+        let randomAngularVelocity = CGFloat.random(in: K.AngularVelocity )
         let randomXVelocity: Int
 
         // Create a random X velocity (how far to move horizontally) that takes into account the enemy's position.
         if randomPosition.x < 256 {
-            randomXVelocity = Int.random(in: 8...15)
+            randomXVelocity = Int.random(in: K.edgeVelocityX)
         } else if randomPosition.x < 512 {
-            randomXVelocity = Int.random(in: 3...5)
+            randomXVelocity = Int.random(in: K.innerVelocityX)
         } else if randomPosition.x < 768 {
-            randomXVelocity = -Int.random(in: 3...5)
+            randomXVelocity = -Int.random(in: K.innerVelocityX)
         } else {
-            randomXVelocity = -Int.random(in: 8...15)
+            randomXVelocity = -Int.random(in: K.edgeVelocityX)
         }
 
         // Create a random Y velocity just to make things fly at different speeds.
-        let randomYVelocity = Int.random(in: 24...32)
+        let randomYVelocity = Int.random(in: K.velocityRangeY)
 
         // Give all enemies a circular physics body where the collisionBitMask is set to 0 so they don't collide.
         enemy.physicsBody = SKPhysicsBody(circleOfRadius: 64)
